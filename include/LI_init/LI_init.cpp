@@ -343,6 +343,9 @@ void LI_Init::solve_Rotation_only() {
 }
 
 void LI_Init::solve_Rot_bias_gyro(double &timediff_imu_wrt_lidar) {
+    Rot_Lidar_wrt_IMU << -0.966, 0.0, -0.26,
+                         0.0, 1.0, 0.0,
+                         0.26, 0.0, -0.966; 
     Eigen::Quaterniond quat(Rot_Lidar_wrt_IMU);
     double R_LI_quat[4];
     R_LI_quat[0] = quat.w();
@@ -362,6 +365,7 @@ void LI_Init::solve_Rot_bias_gyro(double &timediff_imu_wrt_lidar) {
 
     problem_ang_vel.AddParameterBlock(R_LI_quat, 4, quatParam);
     problem_ang_vel.AddParameterBlock(bias_g, 3);
+    problem_ang_vel.SetParameterBlockConstant(R_LI_quat); // Hardcode because we know from URDF for Go2
 
     for (int i = 0; i < IMU_state_group.size(); i++) {
         double deltaT = Lidar_state_group[i].timeStamp - IMU_state_group[i].timeStamp;
@@ -401,6 +405,9 @@ void LI_Init::solve_Rot_bias_gyro(double &timediff_imu_wrt_lidar) {
 }
 
 void LI_Init::solve_trans_biasacc_grav() {
+    V3D lidar_to_imu_translation(0.281, 0.000, -0.168); // Hardcode because known from URDF for Go2
+    V3D imu_to_lidar_translation = -Rot_Lidar_wrt_IMU.transpose() * lidar_to_imu_translation;
+
     M3D Rot_Init = Eye3d;
     Rot_Init.diagonal() = V3D(1, 1, 1);
     Eigen::Quaterniond quat(Rot_Init);
@@ -415,10 +422,8 @@ void LI_Init::solve_trans_biasacc_grav() {
     bias_aL[1] = 0;
     bias_aL[2] = 0;
 
-    double Trans_IL[3]; //Initial value of Translation of IL (IMU with respect to Lidar)
-    Trans_IL[0] = 0.0;
-    Trans_IL[1] = 0.0;
-    Trans_IL[2] = 0.0;
+    double Trans_IL[3]; 
+    Trans_IL[0] = imu_to_lidar_translation.x(); Trans_IL[1] = imu_to_lidar_translation.y(); Trans_IL[2] = imu_to_lidar_translation.z();
 
     ceres::LocalParameterization *quatParam = new ceres::QuaternionParameterization();
     ceres::Problem problem_acc;
@@ -426,6 +431,8 @@ void LI_Init::solve_trans_biasacc_grav() {
     problem_acc.AddParameterBlock(R_GL0_quat, 4, quatParam);
     problem_acc.AddParameterBlock(bias_aL, 3);
     problem_acc.AddParameterBlock(Trans_IL, 3);
+
+    problem_acc.SetParameterBlockConstant(Trans_IL);
 
     //Jacobian of acc_bias, gravity, Translation
     int Jaco_size = 3 * Lidar_state_group.size();
