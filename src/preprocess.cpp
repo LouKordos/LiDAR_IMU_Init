@@ -346,6 +346,9 @@ void Preprocess::process(const sensor_msgs::msg::PointCloud2::UniquePtr &msg, Po
         case L515:
             l515_handler(msg);
             break;
+        case UNITREE:
+            unitree_handler(msg);
+            break;
 
         default:
             printf("Error LiDAR Type");
@@ -697,6 +700,49 @@ void Preprocess::velodyne_handler(const sensor_msgs::msg::PointCloud2::UniquePtr
             if (i % point_filter_num == 0) {
                 pl_surf.points.push_back(added_pt);
             }
+        }
+    }
+}
+
+void Preprocess::unitree_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg) {
+    pl_surf.clear();
+    pl_corn.clear();
+    pl_full.clear();
+
+    pcl::PointCloud<unitree_ros::Point> pl_orig;
+    pcl::fromROSMsg(*msg, pl_orig);
+    int plsize = pl_orig.points.size();
+    if (plsize == 0) return;
+    pl_surf.reserve(plsize);
+
+    // Define the known yaw bias from the Unitree SDK in radians
+    // const double yaw_bias_rad = -38.5 * (M_PI / 180.0);
+    const double yaw_bias_rad = 0.0;
+    const double cos_yaw = cos(yaw_bias_rad);
+    const double sin_yaw = sin(yaw_bias_rad);
+
+    for (int i = 0; i < plsize; i++) {
+        PointType added_pt;
+
+        added_pt.x = pl_orig.points[i].x * cos_yaw - pl_orig.points[i].y * sin_yaw;
+        added_pt.y = pl_orig.points[i].x * sin_yaw + pl_orig.points[i].y * cos_yaw;
+        added_pt.z = pl_orig.points[i].z;
+
+        added_pt.intensity = pl_orig.points[i].intensity;
+        added_pt.normal_x = 0;
+        added_pt.normal_y = 0;
+        added_pt.normal_z = 0;
+        
+        // Use the relative time directly and convert to ms
+        added_pt.curvature = pl_orig.points[i].time * 1000.0; 
+
+        double dist = added_pt.x * added_pt.x + added_pt.y * added_pt.y + added_pt.z * added_pt.z;
+        if (dist < blind * blind || isnan(added_pt.x) || isnan(added_pt.y) || isnan(added_pt.z)) {
+            continue;
+        }
+
+        if (pl_orig.points[i].ring < N_SCANS) {
+            pl_surf.points.push_back(added_pt);
         }
     }
 }

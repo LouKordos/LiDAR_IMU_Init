@@ -406,7 +406,7 @@ void livox_pcl_cbk(const livox_ros_driver2::msg::CustomMsg::UniquePtr msg)
 void imu_cbk(const sensor_msgs::msg::Imu::UniquePtr msg_in) {
     publish_count++;
     mtx_buffer.lock();
-
+    // RCLCPP_INFO(rclcpp::get_logger("IMU_DEBUG"), "IMU Ang Vel [x, y, z]: [%.4f, %.4f, %.4f]", msg_in->angular_velocity.x, msg_in->angular_velocity.y, msg_in->angular_velocity.z);
 
     static double IMU_period, time_msg_in, last_time_msg_in;
     static int imu_cnt = 0;
@@ -433,7 +433,7 @@ void imu_cbk(const sensor_msgs::msg::Imu::UniquePtr msg_in) {
 
 
     sensor_msgs::msg::Imu::SharedPtr msg(new sensor_msgs::msg::Imu(*msg_in));
-
+    
     //IMU Time Compensation
     msg->header.stamp = rclcpp::Time(msg->header.stamp) - rclcpp::Duration::from_seconds(timediff_imu_wrt_lidar - time_lag_IMU_wtr_lidar);
     double timestamp = get_time_sec(msg->header.stamp);
@@ -1230,6 +1230,8 @@ int main(int argc, char **argv) {
                      << state.offset_T_L_I.transpose() << " " << state.vel_end.transpose() << " "  \
                      << " " << state.bias_g.transpose() << " " << state.bias_a.transpose() * 0.9822 / 9.81 << " "
                      << state.gravity.transpose() << " " << total_distance << endl;
+
+            // RCLCPP_INFO(rclcpp::get_logger("LIDAR_ODOM_DEBUG"), "LiDAR Est Ang Vel (state.bias_g) [x, y, z]: [%.4f, %.4f, %.4f]", state.bias_g(0), state.bias_g(1), state.bias_g(2));
 
             //Broadcast every second
             if (imu_en && frame_num % orig_odom_freq * cut_frame_num == 0 && !online_calib_finish) {

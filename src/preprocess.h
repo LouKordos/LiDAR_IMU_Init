@@ -4,6 +4,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/msg/point_cloud2.hpp>
+#include <iostream>
 
 // #include <livox_ros_driver/msg/custom_msg.hpp>
 
@@ -115,6 +116,18 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(robosense_ros::Point,
                                           (double, timestamp, timestamp)
 )
 
+namespace unitree_ros {
+    struct EIGEN_ALIGN16 Point {
+    PCL_ADD_POINT4D;
+    float intensity;
+    float time;
+    uint16_t ring;
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+  };
+}
+
+POINT_CLOUD_REGISTER_POINT_STRUCT(unitree_ros::Point, (float, x, x) (float, y, y) (float, z, z) (float, intensity, intensity) (float, time, time) (uint16_t, ring, ring) )
+
 class Preprocess
 {
   public:
@@ -146,6 +159,7 @@ class Preprocess
 #endif
   void oust_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void velodyne_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
+  void unitree_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void velodyne_handler_kitti(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void l515_handler(const sensor_msgs::msg::PointCloud2::UniquePtr &msg);
   void give_feature(PointCloudXYZI &pl, vector<orgtype> &types);

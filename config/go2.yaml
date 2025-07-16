@@ -1,0 +1,40 @@
+/**:
+    ros__parameters:
+        common:
+            lid_topic:  "/pointcloud" # TODO: Use /utlidar/cloud for correct timestamps, this currently depends on go2_bringup repo
+            imu_topic:  "/imu_lowstate"
+
+        preprocess:
+            lidar_type: 7 # Specifically added for Unitree L1 Lidar based on /utlidar/cloud
+            scan_line: 18
+            blind: 0.5
+            feature_extract_en: false
+
+        initialization:
+            cut_frame_num: 3
+            orig_odom_freq: 11
+            mean_acc_norm: 9.805
+            online_refine_time: 0.0
+            data_accum_length: 700.0
+            Rot_LI_cov: [ 0.0005, 0.0005, 0.0005 ]
+            Trans_LI_cov: [ 0.0001, 0.0001, 0.0001 ]
+
+        mapping:
+            filter_size_surf: 0.15
+            filter_size_map: 0.3
+            gyr_cov: 50.0
+            acc_cov: 2.0
+            b_acc_cov: 0.0001
+            b_gyr_cov: 0.0001
+            det_range: 150.0
+
+        publish:
+            path_en:  true
+            scan_publish_en:  true       # false: close all the point cloud output
+            dense_publish_en: true       # false: low down the points number in a global-frame point clouds scan.
+            scan_bodyframe_pub_en: true  # true: output the point cloud scans in IMU-body-frame
+
+        pcd_save:
+            pcd_save_en: false
+            interval: -1                 # how many LiDAR frames saved in each pcd file; 
+                                        # -1 : all frames will be saved in ONE pcd file, may lead to memory crash when having too much frames.
