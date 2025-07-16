@@ -9,8 +9,8 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-add_compile_options(-std=c++14)
-set(CMAKE_CXX_FLAGS "-std=c++14 -O3")
+add_compile_options(-std=c++17)
+set(CMAKE_CXX_FLAGS "-std=c++17 -O3")
 
 add_definitions(-DROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/\")
 if(ISAAC_SIM)
@@ -18,7 +18,7 @@ if(ISAAC_SIM)
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fexceptions")
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -49,6 +49,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 
 # ROS dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -67,6 +68,8 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(Ceres REQUIRED)
+find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
+
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED COMPONENTS common io)
 if (USE_LIVOX)
@@ -89,6 +92,7 @@ set(dependencies
   tf2
   tf2_ros
   Eigen3
+  ament_index_cpp
   PCL
   Ceres
   tf2_eigen
@@ -133,7 +137,9 @@ target_include_directories(li_init PUBLIC
   $<INSTALL_INTERFACE:include>
   ${PCL_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS}
+  ${PYTHON_NumPy_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
+  ${ament_index_cpp_INCLUDE_DIRS}
 )
 
 target_link_libraries(li_init
@@ -142,6 +148,8 @@ target_link_libraries(li_init
   ${CERES_LIBRARIES}
   Eigen3::Eigen
   spdlog::spdlog
+  Python3::Python
+  Python3::NumPy
   ${OpenCV_LIBS}
   ${cpp_typesupport_target}
 )
