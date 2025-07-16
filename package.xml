@@ -40,6 +40,9 @@
   <depend>Eigen3</depend>
   <depend>PCL</depend>
   <depend>Ceres</depend>
+  <depend>python3</depend>
+  <depend>python3-numpy</depend>
+  <depend>ament_index_cpp</depend>
 
 
   <!-- Runtime dependencies -->
