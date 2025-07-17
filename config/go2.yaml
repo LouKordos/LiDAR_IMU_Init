@@ -1,7 +1,7 @@
 /**:
     ros__parameters:
         common:
-            lid_topic:  "/pointcloud" # TODO: Use /utlidar/cloud for correct timestamps, this currently depends on go2_bringup repo
+            lid_topic:  "/utlidar/cloud" # TODO: Use /utlidar/cloud for correct timestamps, this currently depends on go2_bringup repo
             imu_topic:  "/imu_lowstate"
 
         preprocess:
