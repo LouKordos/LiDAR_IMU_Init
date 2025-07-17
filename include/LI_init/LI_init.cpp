@@ -343,9 +343,12 @@ void LI_Init::solve_Rotation_only() {
 }
 
 void LI_Init::solve_Rot_bias_gyro(double &timediff_imu_wrt_lidar) {
-    Rot_Lidar_wrt_IMU << -0.966, 0.0, -0.26,
-                         0.0, 1.0, 0.0,
-                         0.26, 0.0, -0.966; 
+    // Rot_Lidar_wrt_IMU << -0.966, 0.0, -0.26,
+    //                      0.0, 1.0, 0.0,
+    //                      0.26, 0.0, -0.966; 
+    Rot_Lidar_wrt_IMU << 1.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0,
+                        0.0, 0.0, 1.0;
     Eigen::Quaterniond quat(Rot_Lidar_wrt_IMU);
     double R_LI_quat[4];
     R_LI_quat[0] = quat.w();
@@ -405,7 +408,9 @@ void LI_Init::solve_Rot_bias_gyro(double &timediff_imu_wrt_lidar) {
 }
 
 void LI_Init::solve_trans_biasacc_grav() {
-    V3D lidar_to_imu_translation(0.281, 0.000, -0.168); // Hardcode because known from URDF for Go2
+    // V3D lidar_to_imu_translation(0.281, 0.000, -0.168); // Hardcode because known from URDF for Go2
+    V3D lidar_to_imu_translation(-0.007698, -0.014655, 0.00667); // Hardcode because known from URDF for Go2
+
     V3D imu_to_lidar_translation = -Rot_Lidar_wrt_IMU.transpose() * lidar_to_imu_translation;
 
     M3D Rot_Init = Eye3d;
